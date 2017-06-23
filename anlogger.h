@@ -36,39 +36,49 @@
     #define __anQt__
 #endif
 /*************Standalone Macros**************************************************/
+
+std::string anCurrentLocation() {
+    std::stringstream tmp;
+    tmp << std::this_thread::get_id();
+    return tmp.str();
+}
+
+#define __anPath__
 #ifdef __anWINOS__
-    HANDLE lastRetrievedStdOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO lastRetrievedConsoleScreenBufferInfo;
-    WINBOOL lastConsoleScreenBufferInfoProcurementBooleanResult =
-                GetConsoleScreenBufferInfo(lastRetrievedStdOutputHandle,
-                                           &lastRetrievedConsoleScreenBufferInfo);
-    WORD lastRetrievedConsoleTextAttribute = lastRetrievedConsoleScreenBufferInfo.wAttributes;
-    WORD getCurrentConsoleTextAttribute() {
-        lastRetrievedStdOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-        lastConsoleScreenBufferInfoProcurementBooleanResult =
-                GetConsoleScreenBufferInfo(lastRetrievedStdOutputHandle,
-                                           &lastRetrievedConsoleScreenBufferInfo);
-        if(lastConsoleScreenBufferInfoProcurementBooleanResult)
+    HANDLE anLastRetrievedStdOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO anLastRetrievedConsoleScreenBufferInfo;
+    WINBOOL anLastConsoleScreenBufferInfoProcurementBooleanResult =
+                GetConsoleScreenBufferInfo(anLastRetrievedStdOutputHandle,
+                                           &anLastRetrievedConsoleScreenBufferInfo);
+    WORD anLastRetrievedConsoleTextAttribute =
+            anLastRetrievedConsoleScreenBufferInfo.wAttributes;
+    WORD anGetCurrentConsoleTextAttribute() {
+        anLastRetrievedStdOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        anLastConsoleScreenBufferInfoProcurementBooleanResult =
+                GetConsoleScreenBufferInfo(anLastRetrievedStdOutputHandle,
+                                           &anLastRetrievedConsoleScreenBufferInfo);
+        if(anLastConsoleScreenBufferInfoProcurementBooleanResult)
         {
-            lastRetrievedConsoleTextAttribute = lastRetrievedConsoleScreenBufferInfo.wAttributes;
-            return lastRetrievedConsoleTextAttribute;
+            anLastRetrievedConsoleTextAttribute =
+                    anLastRetrievedConsoleScreenBufferInfo.wAttributes;
+            return anLastRetrievedConsoleTextAttribute;
         }
         else
             return 0;
     }
-    void setCurrentConsoleTextAttribute(WORD TextAttribute) {
+    void anSetCurrentConsoleTextAttribute(WORD TextAttribute) {
 #if _anExplicitTextAttributeRestoration
-        getCurrentConsoleTextAttribute();
+        anGetCurrentConsoleTextAttribute();
 #endif
         if (TextAttribute)
-            SetConsoleTextAttribute(lastRetrievedStdOutputHandle, TextAttribute);
+            anSetConsoleTextAttribute(anLastRetrievedStdOutputHandle,
+                                    TextAttribute);
     }
-    void restorePreviousConsoleTextAttribute() {
-        if (lastRetrievedConsoleTextAttribute)
-            SetConsoleTextAttribute(lastRetrievedStdOutputHandle, lastRetrievedConsoleTextAttribute);
+    void anRestorePreviousConsoleTextAttribute() {
+        if (anLastRetrievedConsoleTextAttribute)
+            anSetConsoleTextAttribute(anLastRetrievedStdOutputHandle,
+                                    anLastRetrievedConsoleTextAttribute);
     }
-    #define setConsoleTextAttribute(TxtAttrib) setCurrentConsoleTextAttribute(TxtAttrib);
-    #define restoreConsoleTextAttribute restorePreviousConsoleTextAttribute();
 /*  8Bit - ConsoleTextAttribute
     bit 0 - foreground blue
     bit 1 - foreground green
@@ -85,6 +95,12 @@
     #define anForegroundMagenta 0b00001101
     #define anForegroundCyan 0b00001011
     #define anForegroundWhite 0b00001111
+
+    #define anSetConsoleTextAttribute(TxtAttrib) \
+        anSetCurrentConsoleTextAttribute(TxtAttrib);
+    #define anRestoreConsoleTextAttribute \
+        anRestorePreviousConsoleTextAttribute();
+
 #elif defined __anLINUXOS__
     #define anForegroundRed 31
     #define anForegroundGreen 32
@@ -94,29 +110,37 @@
     #define anForegroundCyan 36
     #define anForegroundWhite 37
 
-    #define setConsoleTextAttribute(TxtAttrib) std::cerr << "\033["   \
-                                                    << std::to_string(TxtAttrib)\
-                                                    << "m";
-    #define restoreConsoleTextAttribute std::cerr << "\033[0m";
+    #define anSetConsoleTextAttribute(TxtAttrib) \
+        std::cerr << "\033[" \
+        << std::to_string(TxtAttrib)\
+        << "m";
+    #define anRestoreConsoleTextAttribute \
+        std::cerr << "\033[0m";
 #endif
 /********************************************************************************/
 #if _anLoggerEnabled
 /********************************************************************************/
     #define anLogCode(...) __VA_ARGS__
 #ifdef __anQt__
-    #define anMsg(msg, txtColor)    setConsoleTextAttribute(txtColor)           \
-                                    QTextStream(stderr, QIODevice::WriteOnly)   \
-                                                                      << msg;   \
-                                    restoreConsoleTextAttribute
+    #define anMsgWithColor(msg, TxtAttrib) \
+        anSetConsoleTextAttribute(TxtAttrib) \
+        QTextStream(stderr, QIODevice::WriteOnly) << msg; \
+        anRestoreConsoleTextAttribute
+    #define anMsg(msg) QTextStream(stderr, QIODevice::WriteOnly) << msg;
 #else
-    #define anMsg(msg, txtColor)    setConsoleTextAttribute(txtColor)           \
-                                    std::cerr << msg;                           \
-                                    restoreConsoleTextAttribute
+    #define anMsgWithColor(msg, TxtAttrib) \
+        anSetConsoleTextAttribute(TxtAttrib) \
+        std::cerr << msg; \
+        anRestoreConsoleTextAttribute
+    #define anMsg(msg) std::cerr << msg;
 #endif
 /********************************************************************************/
 
 
 /********************************************************************************/
 #else
+    #define anLogCode(...)
+    #define anMsgWithColor(msg, TxtAttrib)
+    #define anMsg(msg)
 #endif
 #endif // ANLOGGER_H
