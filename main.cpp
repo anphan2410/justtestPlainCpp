@@ -1,9 +1,7 @@
 #include "anlogger.h"
 
 #define anMsg(msg, txtAttrib) {\
-        anTxtAttribType previousTxtAttrib = 0;\
-        if (!(_anGetConsoleTextAttribute(previousTxtAttrib)))\
-            previousTxtAttrib = anOriginalConsoleTextAttribute;\
+        std::cout << "This Should Be Printed !" << std::endl;\
     }
 
 int main(int argc, char *argv[])
