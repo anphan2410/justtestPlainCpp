@@ -3,9 +3,9 @@
 //PREREQUISITE: -std=c++11
 /************* Control Flags ****************************************************/
 //_anLoggerEnabled Is Zero => Logger Is Globally Disabled
-#define _anLoggerEnabled 0
+#define _anLoggerEnabled 1
 //_anLoggerEnabled Is Zero => Logger Message Is Not Verbosely Positioned
-#define _anPositionEnabled 1
+#define _anPositionEnabled 0
 /************* Performance Flags ************************************************/
 #define _anMessagePathTextAttribute anDefaultTextAttribute
 #define _anThreadIdPositionEnabled 1
@@ -290,7 +290,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
         }
         if (!rawMsgStr.empty())
             anNoLineMessageLogger(rawMsgStr,nowPath,txtAttrib);
-        anSetConsoleTextAttribute(previousTxtAttrib);
+        anSetConsoleTextAttribute(previousTxtAttrib)
     }
 
     #define anMsg(msg, aTextAttribute) { \
@@ -307,11 +307,11 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
         anTxtAttribType previousTxtAttrib = 0; \
         if (!(_anGetConsoleTextAttribute(previousTxtAttrib))) \
             previousTxtAttrib = anOriginalConsoleTextAttribute; \
-        anSetConsoleTextAttribute(txtAttrib); \
+        anSetConsoleTextAttribute(txtAttrib) \
         anMsgInputToMsgString(msg, tmp) \
         std::cerr << tmp; \
-        anSetConsoleTextAttribute(previousTxtAttrib); \
-    {
+        anSetConsoleTextAttribute(previousTxtAttrib) \
+    }
 #endif
 
 #define anDbg(msg, condition) if (condition) \
