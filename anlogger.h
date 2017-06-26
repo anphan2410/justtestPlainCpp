@@ -304,13 +304,18 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #else
 
     #define anMsg(msg, txtAttrib) {\
+		std::cout << "----- GATE 1 ------" << std::endl;\
         anTxtAttribType previousTxtAttrib = 0;\
         if (!(_anGetConsoleTextAttribute(previousTxtAttrib)))\
             previousTxtAttrib = anOriginalConsoleTextAttribute;\
+		std::cout << "----- GATE 2 ------" << std::endl;\
         anSetConsoleTextAttribute(txtAttrib)\
+		std::cout << "----- GATE 3 ------" << std::endl;\
         anMsgInputToMsgString(msg, tmp)\
+		std::cout << "----- GATE 4 ------" << std::endl;\
         std::cerr << tmp;\
         anSetConsoleTextAttribute(previousTxtAttrib)\
+		std::cout << "----- GATE 5 ------" << std::endl;\
     }
 #endif
 
