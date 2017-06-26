@@ -3,7 +3,7 @@
 //PREREQUISITE: -std=c++11
 /************* Control Flags ****************************************************/
 //_anLoggerEnabled Is Zero => Logger Is Globally Disabled
-#define _anLoggerEnabled 1
+#define _anLoggerEnabled 0
 //_anLoggerEnabled Is Zero => Logger Message Is Not Verbosely Positioned
 #define _anPositionEnabled 1
 /************* Performance Flags ************************************************/
@@ -91,7 +91,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
         anGetCurrentConsoleTextAttribute(destination)
 
     #define anSetConsoleTextAttribute(TextAtrribute) \
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), TextAtrribute)
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), TextAtrribute);
 
     #define __anFilePathSlashChar__ u'\\'
 
@@ -109,7 +109,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
 
     static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
         std::string tmpBuff = std::string(anStdErrBuffer);
-        anTxtAttribType tmp = tmpBuff.find_last_of(u8"\033[") + 2;
+        std::size_t tmp = tmpBuff.find_last_of(u8"\033[") + 1;
         if (tmp != std::string::npos)
         {
             if ((tmpBuff.at(tmp) == u'0') && (tmpBuff.at(tmp+1) == u'm'))
