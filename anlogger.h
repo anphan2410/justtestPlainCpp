@@ -108,10 +108,14 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define anDefaultTextAttribute 0
 
     static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
+		std::cout << "----- GATE na5y ------" << std::endl;
         std::string tmpBuff = std::string(anStdErrBuffer);
+		std::cout << "----- GATE deoi57 ------" << std::endl;
         std::size_t tmp = tmpBuff.find_last_of(u8"\033[") + 1;
+		std::cout << "----- GATE b554sy------" << std::endl;
         if (tmp != std::string::npos)
         {
+			std::cout << "----- GATE s85by ------" << std::endl;
             if ((tmpBuff.at(tmp) == u'0') && (tmpBuff.at(tmp+1) == u'm'))
                 OutputVar = 0;
             else if ((tmpBuff.at(tmp) == u'3') && (tmpBuff.at(tmp+2) == u'm'))
