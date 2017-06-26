@@ -108,15 +108,11 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define anDefaultTextAttribute 0
 
     static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
-		std::cout << "----- GATE na5y ------" << std::endl;
         std::string tmpBuff = std::string(anStdErrBuffer);
-		std::cout << "----- GATE deoi57 ------" << std::endl;
         std::size_t tmp = tmpBuff.find_last_of(u8"\033[");
-		std::cout << "----- GATE b554sy------" << std::endl;
         if (tmp != std::string::npos)
         {
-			tmp += 1;
-			std::cout << "----- GATE s85by ------" << std::endl;
+            ++tmp;
             if ((tmpBuff.at(tmp) == u'0') && (tmpBuff.at(tmp+1) == u'm'))
                 OutputVar = 0;
             else if ((tmpBuff.at(tmp) == u'3') && (tmpBuff.at(tmp+2) == u'm'))
@@ -141,10 +137,8 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
 #endif
 
 static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
-	std::cout << "----- GATE f4q3 ------" << std::endl;
     anTxtAttribType tmp = anDefaultTextAttribute;
     anGetCurrentConsoleTextAttribute(tmp);
-	std::cout << "----- GATE mr769i ------" << std::endl;
     return tmp;
 }();
 #define __anOriginalConsoleTextAttribute__ anOriginalConsoleTextAttribute
@@ -311,18 +305,13 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #else
 
     #define anMsg(msg, txtAttrib) {\
-		std::cout << "----- GATE 1 ------" << std::endl;\
         anTxtAttribType previousTxtAttrib = 0;\
         if (!(_anGetConsoleTextAttribute(previousTxtAttrib)))\
             previousTxtAttrib = anOriginalConsoleTextAttribute;\
-		std::cout << "----- GATE 2 ------" << std::endl;\
         anSetConsoleTextAttribute(txtAttrib)\
-		std::cout << "----- GATE 3 ------" << std::endl;\
         anMsgInputToMsgString(msg, tmp)\
-		std::cout << "----- GATE 4 ------" << std::endl;\
         std::cerr << tmp;\
         anSetConsoleTextAttribute(previousTxtAttrib)\
-		std::cout << "----- GATE 5 ------" << std::endl;\
     }
 #endif
 
