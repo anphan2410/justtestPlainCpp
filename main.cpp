@@ -1,6 +1,6 @@
 #include "anlogger.h"
 
-#define anMsgTest(msg, txtAttrib) { \
+#define anMsgTest(msg, txtAttrib) {\
 		std::cout << "TEST GATE 1" << std::endl; \
         anTxtAttribType previousTxtAttrib = 0; \
         if (!(_anGetConsoleTextAttribute(previousTxtAttrib))) \
@@ -13,6 +13,7 @@
         std::cerr << tmp; \
 		std::cout << "TEST GATE 5" << std::endl; \
         anSetConsoleTextAttribute(previousTxtAttrib) \
+	}
 
 int main(int argc, char *argv[])
 
