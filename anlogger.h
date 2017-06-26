@@ -22,6 +22,7 @@
 #include <thread>
 #include <chrono>
 #include <time.h>
+#include <mutex>
 #if defined _WINDOWS_ || defined __WINDOWS__\
         || defined _WIN16 || defined __TOS_WIN__\
         || defined _WIN32_WCE || defined _WIN32_WCE\
@@ -78,7 +79,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define anForegroundWhite 0b00001111
     #define anDefaultTextAttribute 0b00000111
 
-    static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
+    inline static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
         CONSOLE_SCREEN_BUFFER_INFO tmp;
         if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &tmp))
         {
@@ -107,7 +108,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define anForegroundWhite 37
     #define anDefaultTextAttribute 0
 
-    static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
+    inline static bool anGetCurrentConsoleTextAttribute(anTxtAttribType &OutputVar) {
         std::string tmpBuff = std::string(anStdErrBuffer);
         std::size_t tmp = tmpBuff.find_last_of(u8"\033[");
         if (tmp != std::string::npos)
@@ -131,7 +132,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
         std::string tmp = u8"\033[";\
         tmp += std::to_string(TxtAttrib);\
         tmp += u8"m";\
-        std::cerr << tmp;\
+        fprintf(stderr, tmp.c_str());\
     }
 
     #define __anFilePathSlashChar__ u'/'
@@ -150,7 +151,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
         || _anLinePositionEnabled || _anTimePositionEnabled)
 
     #if _anThreadIdPositionEnabled
-        static const std::string anGetCurrentThreadIdStr(const std::thread::id &currentThreadId) {
+        inline static const std::string anGetCurrentThreadIdStr(const std::thread::id &currentThreadId) {
             std::stringstream tmp;
             tmp << currentThreadId;
             return tmp.str();
@@ -160,7 +161,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 
     #if _anFilePositionEnabled
 
-        static const std::string anGetCurrentFileName(const std::string &currentFilePath) {
+        inline static const std::string anGetCurrentFileName(const std::string &currentFilePath) {
             return currentFilePath.substr(
                         currentFilePath.find_last_of(__anFilePathSlashChar__)+1);
         }
@@ -175,7 +176,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
                 std::chrono::steady_clock::now() - __anStartTimePoint__).count()
     #endif
 
-    static const std::string anCurrentMessagePath(
+    inline static const std::string anCurrentMessagePath(
             #if _anTimePositionEnabled
                 const unsigned long int &currentElapsedTime,
             #endif
@@ -284,15 +285,15 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #endif
 
 #ifndef _anPositionDisabled
-    static void anNoLineMessageLogger(const std::string &aNoLineMessage,
+    inline static void anNoLineMessageLogger(const std::string &aNoLineMessage,
                                   const std::string &msgPath,
                                   const anTxtAttribType &preTxtAttrib) {
-        std::cerr << aNoLineMessage;
+        fprintf(stderr, aNoLineMessage.c_str());
         anSetConsoleTextAttribute(_anMessagePathTextAttribute)
-        std::cerr << msgPath;
+        fprintf(stderr, msgPath.c_str());
         anSetConsoleTextAttribute(preTxtAttrib)
     }
-    static void anColorizedMessageLogger(std::string &rawMsgStr,
+    inline static void anColorizedMessageLogger(std::string &rawMsgStr,
                                          const anTxtAttribType &txtAttrib,
                                          const std::string &currentMsgPath,
                                          const anTxtAttribType &previousTxtAttrib) {
@@ -318,6 +319,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
             prevTxtAttrib = anOriginalConsoleTextAttribute;\
         anMsgInputToMsgString(msg, tmpMsgStr)\
         anColorizedMessageLogger(tmpMsgStr, aTextAttribute, currentMessagePath, prevTxtAttrib);\
+        std::cerr.flush();\
     }
 #else
 
@@ -327,8 +329,9 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
             previousTxtAttrib = anOriginalConsoleTextAttribute;\
         anSetConsoleTextAttribute(txtAttrib)\
         anMsgInputToMsgString(msg, tmp)\
-        std::cerr << tmp;\
+        fprintf(stderr, tmp.c_str());\
         anSetConsoleTextAttribute(previousTxtAttrib)\
+        std::cerr.flush();\
     }
 #endif
 
