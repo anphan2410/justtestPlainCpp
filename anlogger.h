@@ -115,7 +115,7 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
             if ((tmpBuff.at(tmp) == u'0') && (tmpBuff.at(tmp+1) == u'm'))
                 OutputVar = 0;
             else if ((tmpBuff.at(tmp) == u'3') && (tmpBuff.at(tmp+2) == u'm'))
-                OutputVar = std::stoi(tmpBuff.substr(m,2));
+                OutputVar = std::stoi(tmpBuff.substr(tmp,2));
             else
                 return false;
             return true;
