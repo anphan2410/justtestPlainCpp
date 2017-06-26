@@ -136,8 +136,10 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
 #endif
 
 static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
+	std::cout << "----- GATE f4q3 ------" << std::endl;
     anTxtAttribType tmp = anDefaultTextAttribute;
     anGetCurrentConsoleTextAttribute(tmp);
+	std::cout << "----- GATE mr769i ------" << std::endl;
     return tmp;
 }();
 #define __anOriginalConsoleTextAttribute__ anOriginalConsoleTextAttribute
