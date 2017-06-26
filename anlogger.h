@@ -127,10 +127,12 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define _anGetConsoleTextAttribute(destination)\
         anGetCurrentConsoleTextAttribute(destination)
 
-    #define anSetConsoleTextAttribute(TxtAttrib)\
-        std::cerr << u8"\033["\
-        << std::to_string(TxtAttrib)\
-        << u8"m";
+    #define anSetConsoleTextAttribute(TxtAttrib) {\
+        std::string tmp = u8"\033[";\
+        tmp += std::to_string(TxtAttrib);\
+        tmp += u8"m";\
+        std::cerr << tmp;\
+    }
 
     #define __anFilePathSlashChar__ u'/'
 
@@ -146,6 +148,15 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #if _anPositionEnabled && (_anThreadIdPositionEnabled\
         || _anFunctionPositionEnabled || _anFilePositionEnabled\
         || _anLinePositionEnabled || _anTimePositionEnabled)
+
+    #if _anThreadIdPositionEnabled
+        static const std::string anGetCurrentThreadIdStr(const std::thread::id &currentThreadId) {
+            std::stringstream tmp;
+            tmp << currentThreadId;
+            return tmp.str();
+        }
+        #define __anThreadIdStr__ anGetCurrentThreadIdStr(std::this_thread::get_id())
+    #endif
 
     #if _anFilePositionEnabled
 
@@ -169,10 +180,10 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
                 const unsigned long int &currentElapsedTime,
             #endif
             #if _anThreadIdPositionEnabled
-                const std::thread::id &currentThreadId,
+                const std::string &currentThreadIdStr,
             #endif
             #if _anFunctionPositionEnabled
-                const char* currentFunctionName,
+                const std::string &currentFunctionName,
             #endif
             #if _anFilePositionEnabled
                 const std::string &currentFileName,
@@ -181,25 +192,29 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
                 const unsigned int &currentLine
             #endif
             ) {
-        std::stringstream tmp;
-        tmp
+        std::string tmp = u8"";
             #if _anThreadIdPositionEnabled
-                << u8"|" << currentThreadId
+                tmp += u8"|";
+                tmp += currentThreadIdStr;
             #endif
             #if _anFunctionPositionEnabled
-                << u8"|" << currentFunctionName
+                tmp += u8"|";
+                tmp += currentFunctionName;
             #endif
             #if _anFilePositionEnabled
-                << u8"|" << currentFileName
+                tmp += u8"|";
+                tmp += currentFileName;
             #endif
             #if _anLinePositionEnabled
-                << u8"|" << currentLine
+                tmp += u8"|";
+                tmp += std::to_string(currentLine);
             #endif
             #if _anTimePositionEnabled
-                << u8"|" << currentElapsedTime
+                tmp += u8"|";
+                tmp += std::to_string(currentElapsedTime);
             #endif
-            << u8"|";
-        return tmp.str();
+        tmp += u8"|";
+        return tmp;
     }
 
     #if _anTimePositionEnabled
@@ -209,7 +224,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
     #endif
 
     #if _anThreadIdPositionEnabled
-        #define anTmpThreadIdParam std::this_thread::get_id(),
+        #define anTmpThreadIdParam __anThreadIdStr__,
     #else
         #define anTmpThreadIdParam
     #endif
@@ -282,8 +297,10 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
                                          const std::string &currentMsgPath,
                                          const anTxtAttribType &previousTxtAttrib) {
         anSetConsoleTextAttribute(txtAttrib)
-        std::string nowPath = u8"<-" + currentMsgPath;
-        std::string tmpPath = nowPath + u8"\n";
+        std::string nowPath = u8"<-";
+        nowPath += currentMsgPath;
+        std::string tmpPath = nowPath;
+        tmpPath += u8"\n";
         for(std::string::size_type i = 0;(i = rawMsgStr.find(u8"\n", 0)) != std::string::npos;)
         {
             anNoLineMessageLogger(rawMsgStr.substr(0,i++),tmpPath,txtAttrib);
@@ -316,11 +333,11 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #endif
 
 #define anDbg(msg, condition) if (condition)\
-                                anMsg(u8"=> " << msg << "\n", anForegroundCyan)
-#define anInfo(msg) anMsg(u8"   " << msg << "\n", anForegroundWhite)
-#define anAck(msg) anMsg(u8"=> " << msg << "\n", anForegroundGreen)
-#define anWarning(msg) anMsg(u8"=> " << msg << "\n", anForegroundYellow)
-#define anError(msg) anMsg(u8"=> " << msg << "\n", anForegroundRed)
+                                anMsg(u8"=> " << msg << u8"\n", anForegroundCyan)
+#define anInfo(msg) anMsg(u8"   " << msg << u8"\n", anForegroundWhite)
+#define anAck(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundGreen)
+#define anWarning(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundYellow)
+#define anError(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundRed)
 
 /********************************************************************************/
 
