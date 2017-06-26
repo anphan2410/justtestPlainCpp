@@ -5,7 +5,7 @@
 //_anLoggerEnabled Is Zero => Logger Is Globally Disabled
 #define _anLoggerEnabled 1
 //_anLoggerEnabled Is Zero => Logger Message Is Not Verbosely Positioned
-#define _anPositionEnabled 0
+#define _anPositionEnabled 1
 /************* Performance Flags ************************************************/
 #define _anMessagePathTextAttribute anDefaultTextAttribute
 #define _anThreadIdPositionEnabled 1
@@ -273,15 +273,15 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
                                   const std::string &msgPath,
                                   const anTxtAttribType &preTxtAttrib) {
         std::cerr << aNoLineMessage;
-        anSetConsoleTextAttribute(_anMessagePathTextAttribute);
+        anSetConsoleTextAttribute(_anMessagePathTextAttribute)
         std::cerr << msgPath;
-        anSetConsoleTextAttribute(preTxtAttrib);
+        anSetConsoleTextAttribute(preTxtAttrib)
     }
     static void anColorizedMessageLogger(std::string &rawMsgStr,
                                          const anTxtAttribType &txtAttrib,
                                          const std::string &currentMsgPath,
                                          const anTxtAttribType &previousTxtAttrib) {
-        anSetConsoleTextAttribute(txtAttrib);
+        anSetConsoleTextAttribute(txtAttrib)
         std::string nowPath = u8"<-" + currentMsgPath;
         std::string tmpPath = nowPath + u8"\n";
         for(std::string::size_type i = 0;(i = rawMsgStr.find(u8"\n", 0)) != std::string::npos;)
