@@ -3,7 +3,6 @@
 int main(int argc, char *argv[])
 {
 
-    anSetConsoleTextAttribute(anForegroundCyan);
 
     anInfo("This Type Is To Provide Info !");
     anAck("This Type Is To Show Acknowledgement !");
