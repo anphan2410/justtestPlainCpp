@@ -28,6 +28,7 @@
 #include <thread>
 #include <chrono>
 #include <time.h>
+#include <vector>
 #if defined _WINDOWS_ || defined __WINDOWS__\
         || defined _WIN16 || defined __TOS_WIN__\
         || defined _WIN32_WCE || defined _WIN32_WCE\
@@ -160,12 +161,34 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
         || _anLinePositionEnabled || _anTimePositionEnabled)
 
     #if _anThreadIdPositionEnabled
-        inline static const std::string anGetCurrentThreadIdStr(const std::thread::id &currentThreadId) {
+        static std::vector<long long> anStdThreadIdListOfCurrentProgram;
+        static std::vector<unsigned short> anNormalizedThreadIdListOfCurrentProgram;
+        inline static int anStdThreadIdListOfCurrentProgramIndexOf(const long long & aThreadId) {
+            const int maxIndex = static_cast<int>(anStdThreadIdListOfCurrentProgram.size());
+            for (int tmp = 0; tmp < maxIndex; ++tmp) {
+                if (anStdThreadIdListOfCurrentProgram[tmp] == aThreadId)
+                {
+                    return tmp;
+                }
+            }
+            return -1;
+        }
+        inline static unsigned short anGetCurrentNormalizedThreadId(const std::thread::id &currentThreadId) {
             std::stringstream tmp;
             tmp << currentThreadId;
-            return tmp.str();
+            long long currentStdThreadId = std::stoll(tmp.str());
+            int tmpIndex = anStdThreadIdListOfCurrentProgramIndexOf(currentStdThreadId);
+            if (tmpIndex == -1)
+            {
+                anStdThreadIdListOfCurrentProgram.push_back(currentStdThreadId);
+                unsigned short tmpOut = anNormalizedThreadIdListOfCurrentProgram.size();
+                anNormalizedThreadIdListOfCurrentProgram.push_back(tmpOut);
+                return tmpOut;
+            }
+            else
+                return tmpIndex;
         }
-        #define __anThreadIdStr__ anGetCurrentThreadIdStr(std::this_thread::get_id())
+        #define __anNormalizedThreadId__ anGetCurrentNormalizedThreadId(std::this_thread::get_id())
     #endif
 
     #if _anFilePositionEnabled
@@ -194,9 +217,9 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
             #if _anThreadIdPositionEnabled
                 #if _anFunctionPositionEnabled || _anFilePositionEnabled\
                     || _anLinePositionEnabled
-                    const std::string &currentThreadIdStr,
+                    const unsigned short &currentThreadId,
                 #else
-                    const std::string &currentThreadIdStr
+                    const unsigned short &currentThreadId
                 #endif
             #endif
             #if _anFunctionPositionEnabled
@@ -221,7 +244,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
         std::string tmp = u8"";
             #if _anThreadIdPositionEnabled
                 tmp += u8"|";
-                tmp += currentThreadIdStr;
+                tmp += std::to_string(currentThreadId);
             #endif
             #if _anFunctionPositionEnabled
                 tmp += u8"|";
@@ -256,9 +279,9 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 
     #if _anThreadIdPositionEnabled
         #if _anFunctionPositionEnabled || _anFilePositionEnabled || _anLinePositionEnabled
-            #define anTmpThreadIdParamForMsgPathMacro __anThreadIdStr__,
+            #define anTmpThreadIdParamForMsgPathMacro __anNormalizedThreadId__,
         #else
-            #define anTmpThreadIdParamForMsgPathMacro __anThreadIdStr__
+            #define anTmpThreadIdParamForMsgPathMacro __anNormalizedThreadId__
         #endif
     #else
         #define anTmpThreadIdParamForMsgPathMacro
@@ -478,7 +501,7 @@ inline static void anTmpMessageLogger(
                                       ) {
     #ifdef anTmpOutputMsgStrVar
         #ifdef anTmpPrevTxtAtribVar
-            destMsgStr += anSetConsoleTextAttributePrefixString(_anMessagePathTextAttribute);
+            destMsgStr += anSetConsoleTextAttributePrefixString(txtAttrib);
         #endif
     #else
         #ifdef anTmpPrevTxtAtribVar
