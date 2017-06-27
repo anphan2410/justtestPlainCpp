@@ -377,8 +377,7 @@ static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
 #endif
 
 inline static void anTmpNoLineMessageLogger(
-                                    #if defined anTmpPrevTxtAtribVar\
-                                            || defined anTmpCurrentMessagePathStrVar\
+                                    #if defined anTmpCurrentMessagePathStrVar\
                                             || defined anTmpOutputMsgStrVar
                                           const std::string &aNoLineMessage,
                                     #else
@@ -395,12 +394,10 @@ inline static void anTmpNoLineMessageLogger(
                                     #ifdef anTmpCurrentMessagePathStrVar
                                         #ifdef anTmpPrevTxtAtribVar
                                             const std::string &msgPath,
+                                            const anTxtAttribType &prePathAttrib
                                         #else
                                             const std::string &msgPath
                                         #endif
-                                    #endif
-                                    #ifdef anTmpPrevTxtAtribVar
-                                            const anTxtAttribType &prePathAttrib
                                     #endif
                                             ) {
     #ifdef anTmpOutputMsgStrVar
@@ -430,8 +427,7 @@ inline static void anTmpNoLineMessageLogger(
     #endif
 }
 
-#if defined anTmpPrevTxtAtribVar\
-        || defined anTmpCurrentMessagePathStrVar\
+#if defined anTmpCurrentMessagePathStrVar\
         || defined anTmpOutputMsgStrVar
     #define anTmpNoLineMsgParamForNoLineMacro(noLineMsgVar) noLineMsgVar,
 #else
@@ -452,16 +448,13 @@ inline static void anTmpNoLineMessageLogger(
 #ifdef anTmpCurrentMessagePathStrVar
     #ifdef anTmpPrevTxtAtribVar
         #define anTmpMsgPathParamForNoLineMacro(pathStr) pathStr,
+        #define anTmpPrevTxtAtribVarParamForNoLineMacro(prePathTxtAttrib) prePathTxtAttrib
     #else
         #define anTmpMsgPathParamForNoLineMacro(pathStr) pathStr
+        #define anTmpPrevTxtAtribVarParamForNoLineMacro(prePathTxtAttrib)
     #endif
 #else
     #define anTmpMsgPathParamForNoLineMacro(pathStr)
-#endif
-
-#ifdef anTmpPrevTxtAtribVar
-        #define anTmpPrevTxtAtribVarParamForNoLineMacro(prePathTxtAttrib) prePathTxtAttrib
-#else
     #define anTmpPrevTxtAtribVarParamForNoLineMacro(prePathTxtAttrib)
 #endif
 
@@ -513,10 +506,13 @@ inline static void anTmpMessageLogger(
         nowPath += currentMsgPath;
         std::string tmpPath = nowPath;
         tmpPath += u8"\n";
+        #define anTmpRawMsgNoLineSubStrParamForNoLineMsgLoggerFunction rawMsgStr.substr(0,i++)
+    #else
+        #define anTmpRawMsgNoLineSubStrParamForNoLineMsgLoggerFunction rawMsgStr.substr(0,i++) + u8"\n"
     #endif
     for(std::string::size_type i = 0;(i = rawMsgStr.find(u8"\n", 0)) != std::string::npos;)
     {
-        anTmpNoLineMessageLoggerMacro(rawMsgStr.substr(0,i++), destMsgStr, tmpPath, txtAttrib)
+        anTmpNoLineMessageLoggerMacro(anTmpRawMsgNoLineSubStrParamForNoLineMsgLoggerFunction, destMsgStr, tmpPath, txtAttrib)
         rawMsgStr = rawMsgStr.substr(i);
     }
     if (!rawMsgStr.empty())
