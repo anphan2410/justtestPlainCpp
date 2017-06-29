@@ -59,14 +59,6 @@
 #endif
 /************* Support Variables, Functions and Macros **************************/
 
-static char anStdErrBuffer[BUFSIZ];
-
-static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoint = [](){
-    setvbuf(stderr, anStdErrBuffer, _IOFBF, BUFSIZ);
-    return std::chrono::steady_clock::now();
-}();
-#define __anStartTimePoint__ anThisProgramStartingTimePoint
-
 #define anTxtAttribType unsigned short
 
 #ifdef __anWINOS__
@@ -165,13 +157,6 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
     #define __anFilePathSlashChar__ u'/'
 
 #endif
-
-static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
-    anTxtAttribType tmp = anDefaultTextAttribute;
-    anGetCurrentConsoleTextAttribute(tmp);
-    return tmp;
-}();
-#define __anOriginalConsoleTextAttribute__ anOriginalConsoleTextAttribute
 
 #if _anPositionEnabled && (_anThreadIdPositionEnabled\
         || _anFunctionPositionEnabled || _anFilePositionEnabled\
@@ -621,5 +606,19 @@ inline static void anTmpMessageLogger(
     #define anError(msg)
 #endif
 
+/********************************************************************************/
+static char anStdErrBuffer[BUFSIZ];
+static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
+    anTxtAttribType tmp = anDefaultTextAttribute;
+    anGetCurrentConsoleTextAttribute(tmp);
+    return tmp;
+}();
+#define __anOriginalConsoleTextAttribute__ anOriginalConsoleTextAttribute
+static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoint = [](){
+    setvbuf(stderr, anStdErrBuffer, _IOFBF, BUFSIZ);
+    (void) anOriginalConsoleTextAttribute;
+    return std::chrono::steady_clock::now();
+}();
+#define __anStartTimePoint__ anThisProgramStartingTimePoint
 /********************************************************************************/
 #endif // ANLOGGER_H
