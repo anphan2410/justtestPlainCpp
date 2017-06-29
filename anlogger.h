@@ -606,6 +606,7 @@ inline static void anTmpMessageLogger(
     #define anAck(msg)
     #define anWarning(msg)
     #define anError(msg)
+    #define anVar(var)
 #endif
 
 /********************************************************************************/
