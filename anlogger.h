@@ -57,7 +57,9 @@
     #include <QIODevice>
     #define __anQt__
 #endif
-/************* Support Variables, Functions and Macros **************************/
+/********************************************************************************/
+
+static char anStdErrBuffer[BUFSIZ];
 
 #define anTxtAttribType unsigned short
 
@@ -607,10 +609,9 @@ inline static void anTmpMessageLogger(
 #endif
 
 /********************************************************************************/
-static char anStdErrBuffer[BUFSIZ];
 static const anTxtAttribType anOriginalConsoleTextAttribute = [](){
     anTxtAttribType tmp = anDefaultTextAttribute;
-    anGetCurrentConsoleTextAttribute(tmp);
+    _anGetConsoleTextAttribute(tmp);
     return tmp;
 }();
 #define __anOriginalConsoleTextAttribute__ anOriginalConsoleTextAttribute
