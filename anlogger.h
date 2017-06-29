@@ -1,18 +1,23 @@
 #ifndef ANLOGGER_H
 #define ANLOGGER_H
 //PREREQUISITE: -std=c++11
-//NOTICE: Not Guarantee To Be Thread-Safe On Windows
+//NOTICE: On Windows, Only If _anLoggerSafeModeForWindowsEnabled Is Set,
+//              Then An Logger Is Guaranteed To Be Thread-Safe
 /************* Control Flags ****************************************************/
 //_anLoggerEnabled Is Zero => Logger Is Globally Disabled
 #define _anLoggerEnabled 1
 //_anLoggerEnabled Is Zero => Logger Message Is Not Verbosely Positioned
 #define _anPositionEnabled 1
+/************* Performance Flags ************************************************/
 //_anLoggerSafeModeForWindowsEnabled is only used for windows
 //If _anLoggerSafeModeForWindowsEnabled Is Set,
 //Then Logger Message Text Attribute Is Disabled
 //In Return For Thread-Safe Operation
 #define _anLoggerSafeModeForWindowsEnabled 0
-/************* Performance Flags ************************************************/
+//_anLoggerVividModeForLinuxEnabled is only used for linux
+//If _anLoggerVividModeForLinuxEnabled Is Set,
+//Then Logger Message Text Becomes Bold And Brighter
+#define _anLoggerVividModeForLinuxEnabled 0
 #define _anMessagePathTextAttribute anDefaultTextAttribute
 #define _anThreadIdPositionEnabled 1
 #define _anFunctionPositionEnabled 1
@@ -122,10 +127,15 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
             ++tmp;
             if ((tmpBuff.at(tmp) == u'0') && (tmpBuff.at(tmp+1) == u'm'))
                 OutputVar = 0;
-            else if ((tmpBuff.at(tmp) == u'3') && (tmpBuff.at(tmp+2) == u'm'))
-                OutputVar = std::stoi(tmpBuff.substr(tmp,2));
             else
-                return false;
+            {
+                if (tmpBuff.at(tmp) == u'1')
+                    tmp += 2;
+                if ((tmpBuff.at(tmp) == u'3') && (tmpBuff.at(tmp+2) == u'm'))
+                    OutputVar = std::stoi(tmpBuff.substr(tmp,2));
+                else
+                    return false;
+            }
             return true;
         }
         else
@@ -135,10 +145,18 @@ static const std::chrono::steady_clock::time_point anThisProgramStartingTimePoin
         anGetCurrentConsoleTextAttribute(destination)
 
     inline static const std::string anSetConsoleTextAttributePrefixString(anTxtAttribType TxtAttrib) {
-        std::string tmp = u8"\033[";
-        tmp += std::to_string(TxtAttrib);
-        tmp += u8"m";
-        return tmp;
+        if (TxtAttrib)
+        {
+            std::string tmp = u8"\033[";
+            #if _anLoggerVividModeForLinuxEnabled
+                tmp += u8"1;";
+            #endif
+            tmp += std::to_string(TxtAttrib);
+            tmp += u8"m";
+            return tmp;
+        }
+        else
+            return u8"\033[0m";
     }
 
     #define anSetConsoleTextAttribute(TxtAttrib) \
@@ -588,6 +606,8 @@ inline static void anTmpMessageLogger(
     #define anAck(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundGreen)
     #define anWarning(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundYellow)
     #define anError(msg) anMsg(u8"=> " << msg << u8"\n", anForegroundRed)
+
+    #define anVar(var) anInfo(#var << u8" = " << var)
 
 /********************************************************************************/
 
